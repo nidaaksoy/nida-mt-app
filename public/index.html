@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemini Çeviri | Akıllı Makine Çevirisi</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Başlık Çubuğu (Header) -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo">
+        <span class="logo-badge">AI</span>
+        <h1>Gemini<span>Çeviri</span></h1>
+      </div>
+      <div class="header-tagline">
+        Profesyonel & Terimce Destekli Makine Çevirisi
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <!-- Kontrol Paneli: Alan ve Üslup Seçimleri -->
+    <section class="options-bar" aria-label="Çeviri Ayarları">
+      <div class="option-group">
+        <label for="domainSelect">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          Uzmanlık Alanı:
+        </label>
+        <select id="domainSelect">
+          <option value="genel" selected>Genel</option>
+          <option value="hukuk">Hukuk</option>
+          <option value="tip">Tıp & Sağlık</option>
+          <option value="teknik">Teknik & Mühendislik</option>
+          <option value="edebi">Edebi & Yaratıcı</option>
+        </select>
+      </div>
+
+      <div class="option-group">
+        <label for="styleSelect">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Üslup (Ton):
+        </label>
+        <select id="styleSelect">
+          <option value="varsayilan" selected>Doğal / Varsayılan</option>
+          <option value="resmi">Resmi (Siz / Saygılı)</option>
+          <option value="gundelik">Gündelik (Sen / Samimi)</option>
+        </select>
+      </div>
+
+      <button id="toggleGlossaryBtn" class="btn-ghost" type="button" aria-expanded="false" aria-controls="glossarySection">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>Terimce (Glossary)</span>
+        <span class="badge-count" id="glossaryCount">0</span>
+      </button>
+    </section>
+
+    <!-- Terimce (Glossary) Çekmecesi -->
+    <section id="glossarySection" class="glossary-drawer hidden">
+      <div class="glossary-header">
+        <div class="glossary-title">
+          <strong>Özel Terimce (Glossary)</strong>
+          <span>Model bu terim kurallarına zorunlu olarak uyar.</span>
+        </div>
+        <button id="closeGlossaryBtn" class="btn-icon" title="Kapat" aria-label="Terimceyi Kapat">✕</button>
+      </div>
+      <div class="glossary-content">
+        <textarea id="glossaryInput" placeholder="Her satıra bir terim çifti yazın. Örnek:&#10;machine learning = makine öğrenimi&#10;pipeline = veri boru hattı&#10;plaintiff = davacı" rows="4"></textarea>
+        <small class="help-text">Format: <code>kaynak terim = hedef terim</code> (Her satıra bir adet)</small>
+      </div>
+    </section>
+
+    <!-- Hata Bildirim Alanı -->
+    <div id="errorBanner" class="error-banner hidden" role="alert">
+      <div class="error-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div class="error-body">
+        <h4 id="errorTitle">Hata Oluştu</h4>
+        <p id="errorMessage">Hata mesajı metni</p>
+        <div id="errorHint" class="error-hint">Ne yapmalısınız: .env dosyasını kontrol edin.</div>
+      </div>
+      <button id="closeErrorBtn" class="btn-icon" title="Kapat">✕</button>
+    </div>
+
+    <!-- İki Sütunlu Çeviri Bölümü -->
+    <div class="translator-grid">
+      <!-- Sol Panel: Kaynak Metin -->
+      <div class="card panel-source">
+        <div class="panel-header">
+          <div class="lang-selector-wrap">
+            <select id="sourceLangSelect" aria-label="Kaynak Dil">
+              <option value="İngilizce" selected>İngilizce</option>
+              <option value="Türkçe">Türkçe</option>
+              <option value="Almanca">Almanca</option>
+              <option value="İspanyolca">İspanyolca</option>
+              <option value="Fransızca">Fransızca</option>
+              <option value="İtalyanca">İtalyanca</option>
+              <option value="Rusça">Rusça</option>
+              <option value="Arapça">Arapça</option>
+            </select>
+          </div>
+          <button id="swapLangsBtn" class="btn-icon swap-btn" title="Dilleri Değiştir" aria-label="Kaynak ve hedef dilleri yer değiştir">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16l-4-4m0 0l4-4m-4 4h18"/><path d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+          </button>
+        </div>
+
+        <div class="textarea-wrapper">
+          <textarea id="sourceText" placeholder="Çevirmek istediğiniz metni buraya yazın veya yapıştırın..." autofocus></textarea>
+          <div class="textarea-footer">
+            <span id="sourceCharCount">0 karakter</span>
+            <button id="clearSourceBtn" class="btn-text" type="button" title="Metni Temizle">Temizle</button>
+          </div>
+        </div>
+
+        <div class="panel-action">
+          <button id="translateBtn" class="btn-primary" type="button">
+            <span class="btn-text-content">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Çevir
+            </span>
+            <span class="loader hidden" id="translateLoader"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Sağ Panel: Hedef Metin (Çeviri Sonucu) -->
+      <div class="card panel-target">
+        <div class="panel-header">
+          <div class="lang-selector-wrap">
+            <select id="targetLangSelect" aria-label="Hedef Dil">
+              <option value="Türkçe" selected>Türkçe</option>
+              <option value="İngilizce">İngilizce</option>
+              <option value="Almanca">Almanca</option>
+              <option value="İspanyolca">İspanyolca</option>
+              <option value="Fransızca">Fransızca</option>
+              <option value="İtalyanca">İtalyanca</option>
+              <option value="Rusça">Rusça</option>
+              <option value="Arapça">Arapça</option>
+            </select>
+          </div>
+          <div class="panel-actions-top">
+            <button id="copyBtn" class="btn-icon" title="Çeviriyi Kopyala" aria-label="Çeviriyi panoya kopyala">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span class="btn-hint" id="copyTooltip">Kopyala</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="textarea-wrapper">
+          <div id="targetText" class="target-text-display" placeholder="Çeviri burada görüntülenecektir..."></div>
+          <div class="textarea-footer">
+            <span id="targetCharCount">0 karakter</span>
+            <span id="statusIndicator" class="status-ready">Hazır</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <p>Google Gemini 3.5 Flash-Lite ile desteklenmektedir &bull; Antigravity Pair Programming</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
